@@ -1,0 +1,69 @@
+name: Update-btop
+
+# Controls when the workflow will run
+on:
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+
+  update-btop:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      - name: Install dependencies
+        run: sudo apt install git jq curl
+      - name: Check for update
+        run: |
+          error() { #red text and exit 1
+          echo -e "\e[91m$1\e[0m" 1>&2
+          exit 1
+          }
+
+          warning() { #yellow text
+          echo -e "\e[93m\e[5m◢◣\e[25m WARNING: $1\e[0m" 1>&2
+          }
+
+          status() { #cyan text to indicate what is happening
+          #detect if a flag was passed, and if so, pass it on to the echo command
+          if [[ "$1" == '-'* ]] && [ ! -z "$2" ];then
+          echo -e $1 "\e[96m$2\e[0m" 1>&2
+          else
+          echo -e "\e[96m$1\e[0m" 1>&2
+          fi
+          }
+
+          status_green() { #announce the success of a major action
+          echo -e "\e[92m$1\e[0m" 1>&2
+          }
+          
+          get_release() {
+          curl --silent "https://api.github.com/repos/$1/releases/latest" | jq -r '.tag_name' | sed s/v//g
+          }
+          
+          webVer=$(get_release aristocratos/btop)
+          git clone https://github.com/Botspot/pi-apps
+          pi_apps_ver="$(cat "install-32" | grep "version=" | sed 's/version=//')"
+          # echo the versions
+          status "The latest online version is:  $webVer"
+          status "The current version in Pi-Apps is:  $pi_apps_ver"
+          echo
+          #Test to see if version is current:
+          if [ "$pi_apps_ver" = "$webVer" ]; then
+	        #If the version is current do:
+	        status_green 'Pi-Apps version is current!'
+          else
+	        #If version is not current do:
+	        status 'The version on Pi-Apps is not the same as the repository version! Updating now.'
+	        
+          
+          status_green "Pi-Apps new app Version: $webVer"
+          fi
+
+      # Runs a set of commands using the runners shell
+      - name: Run a multi-line script
+        run: |
+          echo Add other actions to build,
+          echo test, and deploy your project.
