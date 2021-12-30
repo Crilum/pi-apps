@@ -44,7 +44,6 @@ jobs:
           }
           
           webVer=$(get_release aristocratos/btop)
-          git clone https://github.com/Botspot/pi-apps
 	  cd apps/btop++/
 	  pi_apps_ver="$(cat "install-32" | grep "version=" | sed 's/version=//')"
           # echo the versions
@@ -59,6 +58,8 @@ jobs:
 	        #If version is not current do:
 	        status 'The version on Pi-Apps is not the same as the repository version! Updating now.'
 	        sed -i "s/version=.*/version=${webVer}/g" install-64 install-32
+		cat install-64
+		cat install-32
           
           status_green "Pi-Apps new app Version: $webVer"
           fi
